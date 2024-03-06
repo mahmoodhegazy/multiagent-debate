@@ -3,7 +3,9 @@ import pandas as pd
 import json
 import time
 import random
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 
 def construct_message(agents, question, idx):
     if len(agents) == 0:
@@ -22,16 +24,15 @@ def construct_message(agents, question, idx):
 
 
 def construct_assistant_message(completion):
-    content = completion["choices"][0]["message"]["content"]
+    content = completion.choices[0].message.content
     return {"role": "assistant", "content": content}
 
 
 def generate_answer(answer_context):
     try:
-        completion = openai.ChatCompletion.create(
-                  model="gpt-3.5-turbo-0301",
-                  messages=answer_context,
-                  n=1)
+        completion = client.chat.completions.create(model="gpt-3.5-turbo-0301",
+        messages=answer_context,
+        n=1)
     except:
         print("retrying due to an error......")
         time.sleep(20)

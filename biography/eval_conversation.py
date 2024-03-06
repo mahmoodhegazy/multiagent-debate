@@ -1,5 +1,7 @@
 import json
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 import numpy as np
 import time
 
@@ -91,10 +93,9 @@ if __name__ == "__main__":
                 message = [{"role": "user", "content": "Consider the following biography of {}: \n {} \n\n Is the above biography above consistent with the fact below? \n\n {} \n Give a single word answer, yes, no, or uncertain. Carefully check the precise dates and locations between the fact and the above biography.".format(person, bio_bullets, bullet)}]
 
                 try:
-                    completion = openai.ChatCompletion.create(
-                              model="gpt-3.5-turbo-0301",
-                              messages=message,
-                              n=1)
+                    completion = client.chat.completions.create(model="gpt-3.5-turbo-0301",
+                    messages=message,
+                    n=1)
                 except Exception as e:
                     print("sleeping")
                     time.sleep(20)
@@ -102,7 +103,7 @@ if __name__ == "__main__":
 
                 print(message)
 
-                content = completion["choices"][0]["message"]["content"]
+                content = completion.choices[0].message.content
                 print(content)
                 accurate = parse_yes_no(content)
 

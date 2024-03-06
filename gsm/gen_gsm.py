@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 import json
 import numpy as np
 import random
@@ -20,7 +22,7 @@ def construct_message(agents, question, idx):
 
 
 def construct_assistant_message(completion):
-    content = completion["choices"][0]["message"]["content"]
+    content = completion.choices[0].message.content
     return {"role": "assistant", "content": content}
 
 
@@ -35,7 +37,7 @@ if __name__ == "__main__":
 
     generated_description = {}
 
-    questions = read_jsonl("/data/vision/billf/scratch/yilundu/llm_iterative_debate/grade-school-math/grade_school_math/data/test.jsonl")
+    questions = read_jsonl("gsm/data/test.jsonl")
     random.shuffle(questions)
 
     for data in questions[:100]:
@@ -52,10 +54,9 @@ if __name__ == "__main__":
                     message = construct_message(agent_contexts_other, question, 2*round - 1)
                     agent_context.append(message)
 
-                completion = openai.ChatCompletion.create(
-                          model="gpt-3.5-turbo-0301",
-                          messages=agent_context,
-                          n=1)
+                completion = client.chat.completions.create(model="gpt-3.5-turbo-0301",
+                messages=agent_context,
+                n=1)
 
                 assistant_message = construct_assistant_message(completion)
                 agent_context.append(assistant_message)
