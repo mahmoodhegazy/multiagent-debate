@@ -1,17 +1,15 @@
-import requests
-import openai
+from openai import OpenAI
 import json
 import numpy as np
 import random
 import time
 from tqdm import tqdm
 import argparse
-
 import pandas as pd
 from tqdm import tqdm
-import os
 from mlx_lm import load, generate
-import traceback
+
+client = None
 
 def args_parse():
     parser = argparse.ArgumentParser()
@@ -65,18 +63,18 @@ def construct_message(agent_context, instruction, idx):
     message = [{"role": "user", "content": prefix_string}]
 
     try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-0613",
-            messages=message,
-            max_tokens=256,
-            n=1
-        )['choices'][0]['message']['content']
+        completion = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+        messages=message,
+        max_tokens=256,
+        n=1)
+        summary = completion.choices[0].message.content
+        print(summary)
     except:
         print("retrying ChatGPT due to an error......")
         time.sleep(5)
         return construct_message(agent_context, instruction, idx)
 
-    prefix_string = f"Here is a summary of responses from other agents: {completion}"
+    prefix_string = f"Here is a summary of responses from other agents: {summary}"
     prefix_string = prefix_string + "\n\n Use this summarization carefully as additional advice, can you provide an updated answer? Make sure to state your answer at the end of the response." + instruction
     return prefix_string
 
@@ -113,6 +111,12 @@ def get_model_and_tokenizer(model_name):
         model, tokenizer = load("mlx-community/quantized-gemma-7b-it")
     elif model_name == 'hermes':
         model, tokenizer = load("mlx-community/Nous-Hermes-2-Mixtral-8x7B-DPO-4bit")
+    elif model_name == "llama":
+        model, tokenizer = load("mlx-community/Llama-2-7b-chat-4-bit")
+    elif model_name == "tinyllama":
+        model, tokenizer = load("mlx-community/TinyLlama-1.1B-Chat-v1.0-4bit")
+    elif model_name == "llama-pro":
+        model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")       
     else:
         raise ValueError(f"Model {model_name} not recognized.")
 
@@ -120,8 +124,8 @@ def get_model_and_tokenizer(model_name):
 
 if __name__ == "__main__":
     args = args_parse()
-    openai.api_key = args.API_KEY
     model_list = [args.model_1, args.model_2, args.model_3]
+    client = OpenAI(api_key=args.API_KEY)
 
     model_dict = {}
     for i,mdl in enumerate(model_list):
@@ -161,7 +165,7 @@ if __name__ == "__main__":
             time.sleep(5)
             return generate_answer(model, formatted_prompt)
         
-        return {"model": model, "content": response}
+        return {"model": model_name, "content": response}
     
     def prompt_formatting(model, instruction, cot):
         if model == "alpaca" or model == "orca":
