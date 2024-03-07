@@ -1,0 +1,51 @@
+{
+    "llama": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "llama-chat": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "vicuna": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "falcon": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "falcon-instruct": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "orca": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    },
+    "wizardlm": {
+        "API_URL": "",
+        "headers": {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        }
+    }
+}
