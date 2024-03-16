@@ -276,12 +276,12 @@ python Math/math_evaulation.py \
 
 **GSM8K**
 ```
-python GSM8K/gsm_evaluation.py \
-    --model_1 llama \
-    --model_2 wizardlm \
-    --model_3 orca \
-    --cot    # If you used 'CoT' while inference, you need to write.
-```
+python GSM8K/gsm_inference.py \
+    --model_1 gemma2B \
+    --model_2 tinyllama \
+    --model_3 gemma7B \
+    --API_KEY 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 \
+    --round 1
 
 **MMLU**
 ```

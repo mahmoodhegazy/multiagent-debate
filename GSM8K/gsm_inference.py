@@ -34,6 +34,7 @@ def args_parse():
         type=str,
         help="Directory to save the result file"
     )
+    # parser.add_argument("--env", type=str) #macOS, cq
 
     return parser.parse_args()
 
@@ -68,7 +69,6 @@ def construct_message(agent_context, instruction, idx):
         max_tokens=256,
         n=1)
         summary = completion.choices[0].message.content
-        print(summary)
     except:
         print("retrying ChatGPT due to an error......")
         time.sleep(5)
@@ -116,10 +116,20 @@ def get_model_and_tokenizer(model_name):
     elif model_name == "tinyllama":
         model, tokenizer = load("mlx-community/TinyLlama-1.1B-Chat-v1.0-4bit")
     elif model_name == "llama-pro":
-        model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")       
+        model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")
+    elif model_name == "qwen":
+        model, tokenizer = load("mlx-community/Qwen1.5-7B-Chat-4bit")            
     else:
         raise ValueError(f"Model {model_name} not recognized.")
 
+    return (model, tokenizer)
+
+def get_model_and_tokenize_for_calcul_q(model_name):
+    # TODO
+    model = None
+    tokenizer = None
+    # Qwen 14B + LLama 13B + Mixtral
+    # Qwen 72B + LLama 70B + 
     return (model, tokenizer)
 
 if __name__ == "__main__":
@@ -134,26 +144,6 @@ if __name__ == "__main__":
     prompt_dict, endpoint_dict = load_json("src/prompt_template.json", "src/inference_endpoint.json")
 
     def generate_answer(model_name, formatted_prompt):
-        # API_URL = endpoint_dict[model]["API_URL"]
-        # headers = endpoint_dict[model]["headers"]
-        # payload = {
-        #     "inputs": formatted_prompt,
-        #     "parameters": {
-        #         "max_new_tokens": 256
-        #     }
-        # }
-
-        # inputs = "" 
-        # if args.model == 'mixtral':
-        #     inputs = f"<s>[INST] {formatted_prompt}\n{questions_string} [/INST]"
-        # elif args.model == 'gemma2B' or args.model == 'gemma7B':
-        #     inputs = f"<start_of_turn>user\n{formatted_prompt}\n{questions_string}<end_of_turn>\n<start_of_turn>model"
-        # elif args.model == 'hermes':
-        #     inputs = f"<|im_start|>system\n{formatted_prompt}<|im_start|>user\n{questions_string}<|im_end|>\n<|im_start|>system"
-        # else:
-        #     raise ValueError(f"Model {args.model} not recognized.")
-
-
         model, tokenizer = model_dict[model_name]
 
         try:
@@ -219,9 +209,13 @@ if __name__ == "__main__":
             f"{args.model_2}": [agent_contexts[1][1]["content"], agent_contexts[1][3]["content"], agent_contexts[1][-1]["content"]],
             f"{args.model_3}": [agent_contexts[2][1]["content"], agent_contexts[2][3]["content"], agent_contexts[2][-1]["content"]]
         }
-        response_summarization = [
-            message[0], message[1]
-        ]
+
+        if rounds < 2:
+            response_summarization = [message[0]]
+        else:
+            response_summarization = [
+                message[0], message[1]
+            ]
         generated_description.append({"question_id": idx, "question": question, "agent_response": models_response, "summarization": response_summarization, "answer": answer})
 
     if args.cot:

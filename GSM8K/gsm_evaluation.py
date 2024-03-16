@@ -104,7 +104,7 @@ if __name__ == "__main__":
     for turn in range(3):
         accuracies = []
         for idx in range(len(questions)):
-            responses = [response_dict[idx]["agent_response"][model][turn] for model in model_list]
+            responses = [response_dict[idx]["agent_response"]["tinyllama"][turn]]# for model in model_list]
             gt = response_dict[idx]["answer"]
 
             accurate = compute_accuracy(gt, responses)
