@@ -27,6 +27,11 @@ def args_parse():
         action="store_true"
     )
     parser.add_argument(
+        "--rounds",
+        type=int,
+        help="It should be the same rounds used in gsm_inference.py"
+    )
+    parser.add_argument(
         "--output_dir",
         default="GSM8K",
         type=str
@@ -101,10 +106,12 @@ if __name__ == "__main__":
 
     performance = []
 
-    for turn in range(3):
+    for turn in range(args.rounds):
         accuracies = []
         for idx in range(len(questions)):
-            responses = [response_dict[idx]["agent_response"]["tinyllama"][turn]]# for model in model_list]
+            responses = [response_dict[idx]["agent_response"][model][turn] for model in model_list]
+            # responses = [response_dict[idx]["agent_response"]["tinyllama"][turn]]# for model in model_list]
+            # responses = [response_dict[idx]["agent_response"]["gemini-pro-3"][turn]]# for model in model_list]
             gt = response_dict[idx]["answer"]
 
             accurate = compute_accuracy(gt, responses)

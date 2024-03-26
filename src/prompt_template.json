@@ -25,11 +25,11 @@
         "response_split": "GPT:"
     },
     "falcon": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "falcon-instruct": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "orca": {
@@ -50,27 +50,35 @@
         "response_split": "Assistant:"
     },
     "mixtral": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gpt": {
-        "prompt": "You are a helpful AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemma2B": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemma7B": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "gemini-pro": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "palm2": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "hermes": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "qwen": {
-        "prompt": "You are a helpful AI assistant and provide the answer for the question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     }
 }
