@@ -45,7 +45,7 @@ def args_parse():
     return parser.parse_args()
 
 
-def generate_response(input, model_name, model, tokenizer, temp=0, max_tokens=256):
+def generate_response(input, model_name, model, tokenizer, temp=0, max_tokens=3000):
     """
     Generate a response using the Mistral model with a given inner setting, prompt, and question string.
     """
@@ -58,7 +58,7 @@ def generate_response(input, model_name, model, tokenizer, temp=0, max_tokens=25
         response = generate(model, tokenizer, input, temp=temp, max_tokens=max_tokens)  # MAX_TOKENS is a critical parameters to avoid annecessary additional text
         return response.strip()
 
-def generate_response_gemini(inputs, model):
+def generate_response_gemini(inputs, model, retry_count=0):
     """
     Generate a response using the Gemini model API,  with a given prompt, and question string.
     """
@@ -67,25 +67,28 @@ def generate_response_gemini(inputs, model):
     from google.api_core import retry
     genai.configure(api_key=args.GOOGLE_API_KEY)
 
-
-    response = model.generate_content(
-        inputs,
-        generation_config=genai.types.GenerationConfig(
-            candidate_count=1,
-            # stop_sequences=['space'],
-            # max_output_tokens=3000,
-            temperature=0),
-            safety_settings={
-                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-            }
-    )
-
-    if not response:
-        print(inputs)
-        print(response.safety_ratings)
+    try:
+        response = model.generate_content(
+            inputs,
+            generation_config=genai.types.GenerationConfig(
+                candidate_count=1,
+                # stop_sequences=['space'],
+                # max_output_tokens=3000,
+                temperature=0),
+                safety_settings={
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                }
+        )
+    except Exception as e:
+        print(f"retrying Gemini due to an error: {e}")
+        time.sleep(5)
+        retry_count+=1
+        if retry_count>10:
+            return ""
+        return generate_response_gemini(inputs, model, retry_count)
 
     return response.text.strip().replace('\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\',"").replace('\\\\\n\\\\\n\\\\\n',"")
 
@@ -106,7 +109,7 @@ def generate_response_palm(inputs, model, retry_count=0):
             model=model,
             prompt=inputs,
             temperature=0,
-            max_output_tokens=256,
+            # max_output_tokens=256,
             safety_settings=[
                 {
                     "category": HarmCategory.HARM_CATEGORY_DEROGATORY,
@@ -123,7 +126,8 @@ def generate_response_palm(inputs, model, retry_count=0):
         time.sleep(5)
         retry_count+=1
         if retry_count>10:
-            raise Exception("Maximum retries exceeded for Palm 2") from e
+            return ""
+            # raise Exception("Maximum retries exceeded for Palm 2") from e
         return generate_response_palm(inputs, model, retry_count)
 
     if not response.result:
@@ -162,7 +166,7 @@ def construct_message_gpt(question, agent_context, instruction, idx):
     prefix_string = prefix_string + "Use this summarization carefully as additional advice, can you provide an updated answer? Make sure to state your answer at the end of the response." + instruction
     return prefix_string
 
-def construct_message_gemini(agent_context, instruction, idx):
+def construct_message_gemini(agent_context, instruction, cot, idx):
     """
     Get summary from Gemini
 
@@ -173,10 +177,12 @@ def construct_message_gemini(agent_context, instruction, idx):
 
     prefix_string = f"{instruction} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response. \n"
     prefix_string = prefix_string+ f"This question was previously asked to other AI agents and here is a summary of responses from other agents for inspiration:\n {summary}\n"
-    prefix_string = prefix_string + " Use this summarization carefully as additional advice in solving the math problem, can you now provide an updated answer? Make sure to state your answer at the end of the response." 
+    prefix_string = prefix_string + " Use this summarization carefully as additional advice in solving the math problem, can you now provide an updated answer? Make sure to state your answer at the end of the response."
+    if cot:
+        prefix_string = prefix_string + "Let's think step by step." 
     return prefix_string
 
-def summarize_message(agent_contexts, model_name, instruction, idx):
+def summarize_message(agent_contexts, model_name, instruction, cot, idx):
     prefix_string = "You are a helpful AI Assistant that is an expert in summarization. Here are a list of opinions from different agents on the answer to a specific math question: \n"
 
     for agent in agent_contexts:
@@ -187,14 +193,17 @@ def summarize_message(agent_contexts, model_name, instruction, idx):
 
     prefix_string = prefix_string + "\n Write a summary of the different opinions from each of the individual agents."
     if model_name == "gemini":
-        summary = construct_message_gemini(prefix_string, instruction, idx)
+        summary = construct_message_gemini(prefix_string, instruction, cot, idx)
     else:
         summary = construct_message_gpt(prefix_string, instruction, idx)
 
     return summary
 
-def generate_gsm(agents, question):
-    agent_contexts = [[{"model": agent, "content": f"Can you solve the following math problem? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response."}] for agent in agents]
+def generate_gsm(agents, question, is_cot):
+    if is_cot:
+        agent_contexts = [[{"model": agent, "content": f"Can you solve the following math problem? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response. Let's think step by step."}] for agent in agents]
+    else:
+        agent_contexts = [[{"model": agent, "content": f"Can you solve the following math problem? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response."}] for agent in agents]
     return agent_contexts
 
 def read_jsonl(path: str):
@@ -258,8 +267,9 @@ if __name__ == "__main__":
 
     prompt_dict, endpoint_dict = load_json("src/prompt_template.json", "src/inference_endpoint.json")
 
-    def generate_answer(model_name, formatted_prompt):
+    def generate_answer(model_name, formatted_prompt, retries = 0):
         model, tokenizer = model_dict[model_name]
+        max_retries = 10
 
         try:
             resp = generate_response(formatted_prompt,model_name, model, tokenizer)
@@ -267,8 +277,11 @@ if __name__ == "__main__":
             response = resp
         except Exception as e:
             print(f"retrying due to an error: {e}")
+            retries+=1
+            if retries > max_retries:
+                return {"model": model_name, "content": ""}
             time.sleep(5)
-            return generate_answer(model_name, formatted_prompt)
+            return generate_answer(model_name, formatted_prompt, retries)
         
         return {"model": model_name, "content": response}
     
@@ -278,8 +291,8 @@ if __name__ == "__main__":
         else:
             prompt = prompt_dict[model]["prompt"]
         
-        if cot:
-            instruction += "Let's think step by step."
+        # if cot:
+        #     instruction += "Let's think step by step."
 
         return {"model": model, "content": prompt.format(instruction=instruction)}
 
@@ -298,7 +311,7 @@ if __name__ == "__main__":
         question = questions[idx]["question"]
         answer = questions[idx]["answer"]
 
-        agent_contexts = generate_gsm(model_list, question)
+        agent_contexts = generate_gsm(model_list, question, args.cot)
 
         print(f"# Question No.{idx+1} starts...")
 
@@ -309,7 +322,8 @@ if __name__ == "__main__":
             # Refer to the summarized previous response
             if debate != 0:
                 # message.append(f"Can you solve the following math problem? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.")
-                message.append(summarize_message(agent_contexts, "gemini", question, 2 * debate - 1))
+                curr_message = summarize_message(agent_contexts, "gemini", question, args.cot, 2 * debate - 1)
+                message.append(curr_message)
                 for i in range(len(agent_contexts)):
                     agent_contexts[i].append(prompt_formatting(agent_contexts[i][-1]["model"], message, args.cot))
 

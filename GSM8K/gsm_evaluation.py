@@ -106,12 +106,11 @@ if __name__ == "__main__":
 
     performance = []
 
-    for turn in range(args.rounds):
+    for turn in range(args.rounds+1):
         accuracies = []
         for idx in range(len(questions)):
             responses = [response_dict[idx]["agent_response"][model][turn] for model in model_list]
-            # responses = [response_dict[idx]["agent_response"]["tinyllama"][turn]]# for model in model_list]
-            # responses = [response_dict[idx]["agent_response"]["gemini-pro-3"][turn]]# for model in model_list]
+            # responses = [response_dict[idx]["agent_response"]["mixtral-3"][turn]]# for model in model_list]
             gt = response_dict[idx]["answer"]
 
             accurate = compute_accuracy(gt, responses)
