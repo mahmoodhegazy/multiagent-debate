@@ -1,4 +1,3 @@
-from openai import OpenAI
 import json
 import numpy as np
 import random
@@ -9,7 +8,6 @@ import pandas as pd
 from tqdm import tqdm
 from mlx_lm import load, generate
 
-client = None
 args = None
 
 def args_parse():
@@ -50,8 +48,10 @@ def generate_response(input, model_name, model, tokenizer, temp=0, max_tokens=30
     Generate a response using the Mistral model with a given inner setting, prompt, and question string.
     """
 
-    if model_name == 'gemini-pro':
+    if (model_name[:-2] == 'gemini-pro') or (model_name == 'gemini-pro'):
         return generate_response_gemini(input, model)
+    elif (model_name[0:3] == 'gpt'):
+        return generate_response_gpt(input, model)
     elif model_name == "palm2":
         return generate_response_palm(input, model)
     else:
@@ -92,6 +92,29 @@ def generate_response_gemini(inputs, model, retry_count=0):
 
     return response.text.strip().replace('\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\',"").replace('\\\\\n\\\\\n\\\\\n',"")
 
+
+
+def generate_response_gpt(inputs, model, retry_count=0):
+    from openai import OpenAI
+    client = OpenAI(api_key=args.OPENAI_API_KEY)
+
+    message = [{"role": "user", "content": inputs}]
+
+    try:
+        completion = client.chat.completions.create(model=model,
+        messages=message,
+        # max_tokens=256,
+        n=1)
+        response = completion.choices[0].message.content
+    except Exception as e:
+        print(f"retrying GPT due to an error: {e}")
+        retry_count+=1
+        if retry_count>10:
+            return ""
+        time.sleep(5)
+        return generate_response_gpt(inputs, model, retry_count)
+
+    return response
 
 def generate_response_palm(inputs, model, retry_count=0):
     """
@@ -145,6 +168,8 @@ def load_json(prompt_path, endpoint_path):
     return prompt_dict, endpoint_dict
 
 def construct_message_gpt(question, agent_context, instruction, idx):
+    from openai import OpenAI
+    client = OpenAI(api_key=args.OPENAI_API_KEY)
     prefix_string = "Here are a list of opinions from different agents: "
 
     prefix_string = prefix_string + agent_context + " Write a summary of the different opinions from each of the individual agent."
@@ -214,7 +239,9 @@ def read_jsonl(path: str):
 def get_model_and_tokenizer(model_name):
 
     if model_name == 'mixtral':
-        model, tokenizer = load("mlx-community/Mixtral-8x7B-Instruct-v0.1-hf-4bit-mlx") 
+        model, tokenizer = load("mlx-community/Mixtral-8x7B-Instruct-v0.1-hf-4bit-mlx")
+    if model_name == 'mistral':
+        model, tokenizer = load("mlx-community/Mistral-7B-Instruct-v0.2-4bit") 
     elif model_name == 'gemma2B':
         model, tokenizer = load("mlx-community/quantized-gemma-2b-it")
     elif model_name == 'gemma7B':
@@ -227,10 +254,16 @@ def get_model_and_tokenizer(model_name):
         model, tokenizer = load("mlx-community/TinyLlama-1.1B-Chat-v1.0-4bit")
     elif model_name == "llama-pro":
         model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")
-    elif model_name == "qwen":
+    elif model_name == "qwen7B":
         model, tokenizer = load("mlx-community/Qwen1.5-7B-Chat-4bit")
-    elif model_name in ['gemini-pro', "palm2"]:
-        model, tokenizer = get_gemini_model(model_name)      
+    elif model_name == "qwen2B":
+        model, tokenizer = load("mlx-community/Qwen1.5-1.8B-Chat-4bit")
+    elif model_name == "MiniCPM2B":
+        model, tokenizer = load("mlx-community/MiniCPM-2B-sft-bf16-llama-format-mlx")
+    elif model_name in ['gemini-pro','gemini-pro-1','gemini-pro-2', "palm2"]:
+        model, tokenizer = get_gemini_model(model_name)
+    elif model_name[0:3] =="gpt":
+        model, tokenizer = get_openai_model(model_name)        
     else:
         raise ValueError(f"Model {model_name} not recognized.")
 
@@ -242,8 +275,20 @@ def get_gemini_model(model_name):
     tokenizer = None
     if model_name == 'gemini-pro':
         model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-1':
+        model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-2':
+        model = genai.GenerativeModel('gemini-pro')
     elif model_name == 'palm2':
         model = 'models/text-bison-001'
+    return model, tokenizer
+
+def get_openai_model(model_name):
+    tokenizer = None
+    if model_name == 'gpt3.5':
+        model = "gpt-3.5-turbo-0613"
+    elif model_name == 'gpt4':
+        model = "gpt-4-turbo-preview"
     return model, tokenizer
 
 # def get_model_and_tokenize_for_calcul_q(model_name):
@@ -257,10 +302,6 @@ def get_gemini_model(model_name):
 if __name__ == "__main__":
     args = args_parse()
     model_list = [args.model_1, args.model_2, args.model_3]
-    # client = OpenAI(api_key=args.API_KEY)
-    # import google.generativeai as genai
-    # genai.configure(api_key=args.GOOGLE_API_KEY)
-
     model_dict = {}
     for i,mdl in enumerate(model_list):
         model_dict[model_list[i]] = get_model_and_tokenizer(model_list[i])

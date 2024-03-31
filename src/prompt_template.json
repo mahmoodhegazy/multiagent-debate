@@ -57,6 +57,14 @@
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
+    "gpt-3.5": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "gpt4": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
     "gemma2B": {
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
@@ -69,6 +77,14 @@
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
+    "gemini-pro-1": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "gemini-pro-2": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
     "palm2": {
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
@@ -77,7 +93,15 @@
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
-    "qwen": {
+    "qwen2B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "qwen7B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "MiniCPM2B": {
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     }
