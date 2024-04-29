@@ -1,7 +1,7 @@
 {
     "llama": {
-        "prompt": "SYSTEM: You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\nUSER: {instruction}\nASSISTANT: ",
-        "response_split": "ASSISTANT: "
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
     },
     "llama-chat": {
         "prompt": "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<<SYS>>\n{instruction}[/INST]",
@@ -25,11 +25,11 @@
         "response_split": "GPT:"
     },
     "falcon": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "falcon-instruct": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "orca": {
@@ -50,7 +50,15 @@
         "response_split": "Assistant:"
     },
     "mixtral": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "mistral": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "mixtral22Bx8": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gpt": {
@@ -66,43 +74,63 @@
         "response_split": ">>ANSWER<<"
     },
     "gemma2B": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemma7B": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemini-pro": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemini-pro-1": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "gemini-pro-2": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "palm2": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "hermes": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "qwen0.5B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "qwen2B": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "qwen4B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "qwen7B": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "qwen14B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "qwen72B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
     "MiniCPM2B": {
-        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "rho1B": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     }
 }

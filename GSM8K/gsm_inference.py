@@ -240,24 +240,38 @@ def get_model_and_tokenizer(model_name):
 
     if model_name == 'mixtral':
         model, tokenizer = load("mlx-community/Mixtral-8x7B-Instruct-v0.1-hf-4bit-mlx")
-    if model_name == 'mistral':
+    elif model_name == 'mixtral22Bx8':
+        model, tokenizer = load("mlx-community/mixtral-8x22b-instruct-oh-4bit")
+    elif model_name == 'mistral':
         model, tokenizer = load("mlx-community/Mistral-7B-Instruct-v0.2-4bit") 
     elif model_name == 'gemma2B':
-        model, tokenizer = load("mlx-community/quantized-gemma-2b-it")
+        model, tokenizer = load("mlx-community/gemma-1.1-2b-it-4bit")
     elif model_name == 'gemma7B':
-        model, tokenizer = load("mlx-community/quantized-gemma-7b-it")
+        model, tokenizer = load("mlx-community/gemma-1.1-7b-it-4bit")
+    elif model_name == 'rho1B':
+        model, tokenizer = load("mlx-community/rho-math-1b-v0.1-4bit")
+    elif model_name == 'rho7B':
+        model, tokenizer = load("mlx-community/rho-math-7b-v0.1-4bit")
     elif model_name == 'hermes':
         model, tokenizer = load("mlx-community/Nous-Hermes-2-Mixtral-8x7B-DPO-4bit")
     elif model_name == "llama":
-        model, tokenizer = load("mlx-community/Llama-2-7b-chat-4-bit")
+        model, tokenizer = load("mlx-community/Vikhr-7B-instruct_0.2-4bit")
     elif model_name == "tinyllama":
         model, tokenizer = load("mlx-community/TinyLlama-1.1B-Chat-v1.0-4bit")
     elif model_name == "llama-pro":
         model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")
+    elif model_name == "qwen72B":
+        model, tokenizer = load("mlx-community/Qwen1.5-72B-Chat-4bit")
+    elif model_name == "qwen14B":
+        model, tokenizer = load("mlx-community/Qwen1.5-14B-Chat-4bit")
     elif model_name == "qwen7B":
         model, tokenizer = load("mlx-community/Qwen1.5-7B-Chat-4bit")
+    elif model_name == "qwen4B":
+        model, tokenizer = load("mlx-community/Qwen1.5-4B-Chat-4bit")
     elif model_name == "qwen2B":
         model, tokenizer = load("mlx-community/Qwen1.5-1.8B-Chat-4bit")
+    elif model_name == "qwen0.5B":
+        model, tokenizer = load("mlx-community/Qwen1.5-0.5B-Chat-4bit")
     elif model_name == "MiniCPM2B":
         model, tokenizer = load("mlx-community/MiniCPM-2B-sft-bf16-llama-format-mlx")
     elif model_name in ['gemini-pro','gemini-pro-1','gemini-pro-2', "palm2"]:
@@ -279,6 +293,8 @@ def get_gemini_model(model_name):
         model = genai.GenerativeModel('gemini-pro')
     elif model_name == 'gemini-pro-2':
         model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-1.5':
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
     elif model_name == 'palm2':
         model = 'models/text-bison-001'
     return model, tokenizer
@@ -296,7 +312,7 @@ def get_openai_model(model_name):
 #     model = None
 #     tokenizer = None
 #     # Qwen 14B + LLama 13B + Mixtral
-#     # Qwen 72B + LLama 70B + 
+#     # Qwen 72B + LLama 70B + Mixtral
 #     return (model, tokenizer)
 
 if __name__ == "__main__":

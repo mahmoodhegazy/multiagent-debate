@@ -110,7 +110,7 @@ if __name__ == "__main__":
         accuracies = []
         for idx in range(len(questions)):
             responses = [response_dict[idx]["agent_response"][model][turn] for model in model_list]
-            # responses = [response_dict[idx]["agent_response"]["mixtral-3"][turn]]# for model in model_list]
+            # responses = [response_dict[idx]["agent_response"]["palm2-2"][turn]] #if we want ton get performance of certgain model in debate
             gt = response_dict[idx]["answer"]
 
             accurate = compute_accuracy(gt, responses)
