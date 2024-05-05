@@ -5,59 +5,12 @@ We tried to follow the overall framework of [llm_multiagent_debate](https://gith
 
 ## ToC
 
-1. [Introduction & Motivation](#introduction--motivation)
-2. [What is LLM Agora?](#what-is-llm-agora)
-3. [Experiments](#experiments)
-4. [Analysis](#analysis)
-5. [Future work](#future-work)
-6. [How to do?](#how-to-do)
+1. [Experiment setup](#experiments)
+2. [How to do?](#how-to-do)
 
-## Introduction & Motivation
+## Experiment setup
 
-The LLM Agora project is inspired by the multi-agent debate introduced in the paper '[Improving Factuality and Reasoning in Language Models through Multiagent Debate](https://arxiv.org/abs/2305.14325)' as mentioned above.
-Therefore, before start introducing the LLM Agora, we would like to explain the concept of multiagent debate!
-
-With the remarkable development of LLM, LLM has become capable of outputting responses at a significantly higher level.
-For example, GPT-4 is enough to pass even difficult exams. 
-Despite the brilliant performance of proprietary LLMs, their first responses have some errors or mistakes. 
-Then, how can correct and revise the responses? 
-In the paper, they suggested that debate between several agents can revise the responses and improve the performance!
-Through several experiments, the fact that this method can correct the errors in responses and revise the quality of responses was proved. (If you want to know more, please check the official [GitHub Page of paper](https://composable-models.github.io/llm_debate/)!)
-
-In the paper, the overall experiment is conducted using only one model, but in the Analysis part, it is said that a synergy effect that shows further improved performance can be seen when different types of LLM are used.
-The LLM Agora is exactly inspired from this point! 
-
-We started the LLM Agora project with the expectation that if several open-source LLMs create a synergy effect through debate between other models, we can expect an effect that can complement the shortcomings of open-source LLM, which still has some shortcomings.
-Therefore, we carried out the LLM Agora project because we thought it could be a groundbreaking method if multi-agent debate could improve the quality of responses of open-source LLMs.
-
-## What is LLM Agora?
-
-The meaning of '[Agora](https://en.wikipedia.org/wiki/Agora)' is a place where meetings were held in ancient Greece.
-We thought this meaning was similar to a multi-agent debate, so we named it **LLM Agora**.
-The summarized difference between multi-agent debate and LLM Agora is as follows:
-
-1. **Models**: **Several open-source LLMs** were utilized, unlike the paper that used proprietary LLM(ChatGPT).
-In addition, we analyzed whether using open-source LLM in multi-agent debate is effective or not, and used various models to check the synergy effect.
-2. **Summarization**: The concatenated response was used for the debate sentence in the paper. However, according to the experimental result of the paper, it is more effective to summarize the models' responses and use them as a debate sentence. Therefore, we summarized the models' responses with ChatGPT and used it as a debate sentence.
-3. **Chain-of-Thought**: We used **Chain-of-Thought** in a multi-agent debate to confirm whether open-source LLM can achieve performance improvement through Chain-of-Thought and to determine its impact on the debate.
-4. **HuggingFace Space**: We implemented LLM Agora in HuggingFace Space so that people can directly use LLM Agora and check the responses generated through experiments.
-It's open to everyone, so check it out! [LLM Agora Space](https://huggingface.co/spaces/Cartinoe5930/LLMAgora)
-
-We hope that LLM Agora will be used in the future as a way to improve the performance of open-source models as well as proprietary models. 
-Once again, we would like to thank the authors of the '[Improving Factuality and Reasoning in Language Models through Multiagent Debate](https://arxiv.org/abs/2305.14325)' for suggesting the idea of multiagent-debate.
-
-## Experiments
-
-We followed the experiments progressed in the paper to prove the effectiveness of multi-agent debate on various open-source LLMs.
-The goal of experiments is as follows:
-
-- Effects of using open-source models for multi-agent debate
-- Impact of CoT on open-source models and multi-agent debate
-- Synergies of using diverse models
-
-### Experimental setup
-
-#### Tasks
+### Tasks
 
 We experimented using the same task in the paper.
 The tasks on which the experiment was performed are as follows: 
@@ -65,16 +18,18 @@ The tasks on which the experiment was performed are as follows:
 - **Math**: The problem of arithmetic operations on six randomly selected numbers. The format is `{}+{}*{}+{}-{}*{}=?`
 - **GSM8K**: GSM8K is a dataset consisting of high-quality linguistically diverse grade school math word problems.
 - **MMLU**: MMLU is a benchmark covering 57 subjects across STEM, the humanities, the social sciences, and more.
+- **SVAMP**: 
+- **ASDiv**:
 
 For all tasks, only 100 questions were sampled and used in the experiment.
 
-#### The number of agents & rounds
+### The number of agents & rounds
 
 The multi-agent debate has some special parameters such as the number of **agents** and **rounds**.
 Each means **the number of used models for debate** and **the number of will be conducted debate rounds**.
 The number of agents and rounds were set to **3** and **2**, respectively, due to the resource issue.
 
-#### Prompt Format
+### Prompt Format
 
 Please check the `src/prompt_template.json`!
 
