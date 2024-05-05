@@ -65,7 +65,7 @@
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
-    "gpt-3.5": {
+    "gpt3.5": {
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for math problem. Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response \n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },
@@ -86,6 +86,10 @@
         "response_split": ">>ANSWER<<"
     },
     "gemini-pro-1": {
+        "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
+        "response_split": ">>ANSWER<<"
+    },
+    "gemini-pro-1.5": {
         "prompt": "You are a helpful math expert AI assistant and will provide the answer for the follwing math question.Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.\n>>QUESTION<<\n{instruction}\n>>ANSWER<<\n",
         "response_split": ">>ANSWER<<"
     },

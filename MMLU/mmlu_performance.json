@@ -1,11 +1,14 @@
 [
     {
-        "1_performance": 0.48
+        "1_performance": 0.59
     },
     {
-        "2_performance": 0.0
+        "2_performance": 0.79
     },
     {
-        "3_performance": 0.54
+        "3_performance": 0.8
+    },
+    {
+        "4_performance": 0.87
     }
 ]

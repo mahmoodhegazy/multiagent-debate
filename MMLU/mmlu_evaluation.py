@@ -31,6 +31,12 @@ def args_parse():
         default="MMLU",
         type=str
     )
+    parser.add_argument(
+        "--round",
+        default=4,
+        type=int
+    )
+
 
     return parser.parse_args()
 
@@ -103,7 +109,7 @@ if __name__ == "__main__":
 
     performance = []
 
-    for turn in range(3):
+    for turn in range(args.round):
         accuracies = []
         for idx in range(len(questions)):
             responses = [response_dict[idx]["agent_response"][model][turn] for model in model_list]

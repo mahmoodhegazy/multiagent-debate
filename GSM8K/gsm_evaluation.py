@@ -27,7 +27,7 @@ def args_parse():
         action="store_true"
     )
     parser.add_argument(
-        "--rounds",
+        "--round",
         type=int,
         help="It should be the same rounds used in gsm_inference.py"
     )

@@ -8,3 +8,5 @@ random
 argparse
 re
 pandas
+mlx-lm
+google-generativeai

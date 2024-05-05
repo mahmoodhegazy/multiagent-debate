@@ -64,7 +64,6 @@ def generate_response_gemini(inputs, model, retry_count=0):
     """
     from google.generativeai.types import HarmCategory, HarmBlockThreshold
     import google.generativeai as genai
-    from google.api_core import retry
     genai.configure(api_key=args.GOOGLE_API_KEY)
 
     try:

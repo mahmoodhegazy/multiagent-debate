@@ -4,9 +4,12 @@ from tqdm import tqdm
 import json
 import time
 import random
-from openai import OpenAI
+from tqdm import tqdm
+import argparse
+import pandas as pd
+from tqdm import tqdm
+from mlx_lm import load, generate
 
-client = OpenAI(api_key=args.API_KEY)
 import argparse
 import requests
 
@@ -16,7 +19,12 @@ def args_parse():
     parser.add_argument("--model_2", type=str)
     parser.add_argument("--model_3", type=str)
     parser.add_argument(
-        "--API_KEY",
+        "--OPENAI_API_KEY",
+        type=str,
+        help="your OpenAI API key to use gpt-3.5-turbo"
+    )
+    parser.add_argument(
+        "--GOOGLE_API_KEY",
         type=str,
         help="your OpenAI API key to use gpt-3.5-turbo"
     )
@@ -33,8 +41,134 @@ def args_parse():
         type=str,
         help="Directory to save the result file"
     )
+    # parser.add_argument("--env", type=str) #macOS, cq
 
     return parser.parse_args()
+
+def generate_response(input, model_name, model, tokenizer, temp=0, max_tokens=3000):
+    """
+    Generate a response using the Mistral model with a given inner setting, prompt, and question string.
+    """
+
+    if (model_name[:-2] == 'gemini-pro') or (model_name == 'gemini-pro'):
+        return generate_response_gemini(input, model)
+    elif (model_name[0:3] == 'gpt'):
+        return generate_response_gpt(input, model)
+    elif model_name == "palm2":
+        return generate_response_palm(input, model)
+    else:
+        response = generate(model, tokenizer, input, temp=temp, max_tokens=max_tokens)  # MAX_TOKENS is a critical parameters to avoid annecessary additional text
+        return response.strip()
+
+def generate_response_gemini(inputs, model, retry_count=0):
+    """
+    Generate a response using the Gemini model API,  with a given prompt, and question string.
+    """
+    from google.generativeai.types import HarmCategory, HarmBlockThreshold
+    import google.generativeai as genai
+    from google.api_core import retry
+    genai.configure(api_key=args.GOOGLE_API_KEY)
+
+    try:
+        response = model.generate_content(
+            inputs,
+            generation_config=genai.types.GenerationConfig(
+                candidate_count=1,
+                # stop_sequences=['space'],
+                # max_output_tokens=3000,
+                temperature=0),
+                safety_settings={
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                }
+        )
+    except Exception as e:
+        print(f"retrying Gemini due to an error: {e}")
+        time.sleep(5)
+        retry_count+=1
+        if retry_count>10:
+            return ""
+        return generate_response_gemini(inputs, model, retry_count)
+    
+    try:
+        temp = response.text
+    except Exception as e:
+        print(f"retrying Gemini due to an error: {e}")
+        time.sleep(5)
+        retry_count+=1
+        if retry_count>10:
+            return ""
+        return generate_response_gemini(inputs, model, retry_count)
+
+    return response.text.strip().replace('\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\\n\\',"").replace('\\\\\n\\\\\n\\\\\n',"")
+
+
+
+def generate_response_gpt(inputs, model, retry_count=0):
+    from openai import OpenAI
+    client = OpenAI(api_key=args.OPENAI_API_KEY)
+
+    message = [{"role": "user", "content": inputs}]
+
+    try:
+        completion = client.chat.completions.create(model=model,
+        messages=message,
+        # max_tokens=256,
+        n=1)
+        response = completion.choices[0].message.content
+    except Exception as e:
+        print(f"retrying GPT due to an error: {e}")
+        retry_count+=1
+        if retry_count>10:
+            return ""
+        time.sleep(5)
+        return generate_response_gpt(inputs, model, retry_count)
+
+    return response
+
+def generate_response_palm(inputs, model, retry_count=0):
+    """
+    Generate a response using the Palm API, with a given prompt, and question string.
+    """
+    from google.generativeai.types import HarmCategory, HarmBlockThreshold
+    import google.generativeai as genai
+    genai.configure(api_key=args.GOOGLE_API_KEY)
+
+    if not retry_count:
+        retry_count = 0
+
+    try:
+        response = genai.generate_text(
+            model=model,
+            prompt=inputs,
+            temperature=0,
+            # max_output_tokens=256,
+            safety_settings=[
+                {
+                    "category": HarmCategory.HARM_CATEGORY_DEROGATORY,
+                    "threshold": HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    "category": HarmCategory.HARM_CATEGORY_VIOLENCE,
+                    "threshold": HarmBlockThreshold.BLOCK_NONE,
+                },
+            ]
+        )
+    except Exception as e:
+        print(f"retrying Palm 2 due to an error: {e}")
+        time.sleep(5)
+        retry_count+=1
+        if retry_count>10:
+            return ""
+            # raise Exception("Maximum retries exceeded for Palm 2") from e
+        return generate_response_palm(inputs, model, retry_count)
+
+    if not response.result:
+        return ""
+    else:
+        return response.result.strip()
 
 def load_json(prompt_path, endpoint_path):
     with open(prompt_path, "r") as prompt_file:
@@ -45,10 +179,12 @@ def load_json(prompt_path, endpoint_path):
 
     return prompt_dict, endpoint_dict
 
-def construct_message(agent_context, instruction, idx):
+def construct_message_gpt(question, agent_context, instruction, idx):
+    from openai import OpenAI
+    client = OpenAI(api_key=args.OPENAI_API_KEY)
     prefix_string = "Here are a list of opinions from different agents: "
 
-    prefix_string = prefix_string + agent_context + "\n\n Write a summary of the different opinions from each of the individual agent."
+    prefix_string = prefix_string + agent_context + " Write a summary of the different opinions from each of the individual agent."
 
     message = [{"role": "user", "content": prefix_string}]
 
@@ -56,63 +192,223 @@ def construct_message(agent_context, instruction, idx):
         completion = client.chat.completions.create(model="gpt-3.5-turbo-0613",
         messages=message,
         max_tokens=256,
-        n=1)['choices'][0]['message']['content']
+        n=1)
+        summary = completion.choices[0].message.content
     except:
         print("retrying ChatGPT due to an error......")
         time.sleep(5)
-        return construct_message(agent_context, instruction, idx)
+        return construct_message_gpt(agent_context, instruction, idx)
 
-    prefix_string = f"Here is a summary of responses from other agents: {completion}"
-    prefix_string = prefix_string + "\n\n Use this summarization carefully as additional advice, can you provide an updated answer? Make sure to state your answer at the end of the response." + instruction
+    prefix_string = f"Here is a summary of responses from other agents: {summary} \n"
+    prefix_string = prefix_string + "Use this summarization carefully as additional advice, can you provide an updated answer? Make sure to state your answer at the end of the response." + instruction
     return prefix_string
 
-def summarize_message(agent_contexts, instruction, idx):
-    prefix_string = "Here are a list of opinions from different agents: "
+def construct_message_gemini(agent_context, instruction, cot, idx):
+    """
+    Get summary from Gemini
+
+    """
+    inputs = f"<start_of_turn>user{agent_context}<end_of_turn><start_of_turn>model"
+    model, _ = get_gemini_model("gemini-pro")
+    summary = generate_response_gemini(inputs, model)
+
+    prefix_string = f"{instruction} Explain your reasoning. Your final answer should be a single alphabetic letter, in the form \\boxed{{answer}}, at the end of your response. \n"
+    prefix_string = prefix_string+ f"This question was previously asked to other AI agents and here is a summary of responses from other agents for inspiration:\n {summary}\n"
+    prefix_string = prefix_string + " Use this summarization carefully as additional advice in solving the math problem, can you now provide an updated answer? Make sure to state the single alphabetic letter your answer at the end of the response."
+    if cot:
+        prefix_string = prefix_string + "Let's think step by step." 
+    return prefix_string
+
+def summarize_message(agent_contexts, model_name, instruction, cot, idx):
+    prefix_string = "You are a helpful AI Assistant that is an expert in summarization. Here are a list of opinions from different agents on the answer to a specific math question: \n"
 
     for agent in agent_contexts:
         agent_response = agent[-1]["content"]
-        response = "\n\n One agent response: ```{}```".format(agent_response)
+        response = " One agent response: ```{}```".format(agent_response)
 
         prefix_string = prefix_string + response
 
-    prefix_string = prefix_string + "\n\n Write a summary of the different opinions from each of the individual agent."
-    completion = construct_message(prefix_string, instruction, idx)
+    prefix_string = prefix_string + "\n Write a summary of the different opinions from each of the individual agents."
+    if model_name == "gemini":
+        summary = construct_message_gemini(prefix_string, instruction, cot, idx)
+    else:
+        summary = construct_message_gpt(prefix_string, instruction, idx)
 
-    return completion
+    return summary
+
+def read_jsonl(path: str):
+    with open(path, "r") as fh:
+        return [json.loads(line) for line in fh.readlines() if line]
+
+
+def get_model_and_tokenizer(model_name):
+
+    if model_name == 'mixtral':
+        model, tokenizer = load("mlx-community/Mixtral-8x7B-Instruct-v0.1-hf-4bit-mlx")
+    elif model_name == 'mixtral22Bx8':
+        model, tokenizer = load("mlx-community/mixtral-8x22b-instruct-oh-4bit")
+    elif model_name == 'mistral':
+        model, tokenizer = load("mlx-community/Mistral-7B-Instruct-v0.2-4bit") 
+    elif model_name == 'gemma2B':
+        model, tokenizer = load("mlx-community/gemma-1.1-2b-it-4bit")
+    elif model_name == 'gemma7B':
+        model, tokenizer = load("mlx-community/gemma-1.1-7b-it-4bit")
+    elif model_name == 'rho1B':
+        model, tokenizer = load("mlx-community/rho-math-1b-v0.1-4bit")
+    elif model_name == 'rho7B':
+        model, tokenizer = load("mlx-community/rho-math-7b-v0.1-4bit")
+    elif model_name == 'hermes':
+        model, tokenizer = load("mlx-community/Nous-Hermes-2-Mixtral-8x7B-DPO-4bit")
+    elif model_name == "llama":
+        model, tokenizer = load("mlx-community/Meta-Llama-3-8B-Instruct-4bit")
+    elif model_name == "tinyllama":
+        model, tokenizer = load("mlx-community/TinyLlama-1.1B-Chat-v1.0-4bit")
+    elif model_name == "llama-pro":
+        model, tokenizer = load("mlx-community/LLaMA-Pro-8B-Instruct-mlx")
+    elif model_name == "qwen72B":
+        model, tokenizer = load("mlx-community/Qwen1.5-72B-Chat-4bit")
+    elif model_name == "qwen14B":
+        model, tokenizer = load("mlx-community/Qwen1.5-14B-Chat-4bit")
+    elif model_name == "qwen7B":
+        model, tokenizer = load("mlx-community/Qwen1.5-7B-Chat-4bit")
+    elif model_name == "qwen4B":
+        model, tokenizer = load("mlx-community/Qwen1.5-4B-Chat-4bit")
+    elif model_name == "qwen2B":
+        model, tokenizer = load("mlx-community/Qwen1.5-1.8B-Chat-4bit")
+    elif model_name == "qwen0.5B":
+        model, tokenizer = load("mlx-community/Qwen1.5-0.5B-Chat-4bit")
+    elif model_name == "MiniCPM2B":
+        model, tokenizer = load("mlx-community/MiniCPM-2B-sft-bf16-llama-format-mlx")
+    elif model_name in ['gemini-pro','gemini-pro-1','gemini-pro-2', "palm2", "gemini-pro-1.5"]:
+        model, tokenizer = get_gemini_model(model_name)
+    elif model_name[0:3] =="gpt":
+        model, tokenizer = get_openai_model(model_name)        
+    else:
+        raise ValueError(f"Model {model_name} not recognized.")
+
+    return (model, tokenizer)
+
+def get_gemini_model(model_name):
+    import google.generativeai as genai
+    genai.configure(api_key=args.GOOGLE_API_KEY)
+    tokenizer = None
+    if model_name == 'gemini-pro':
+        model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-1':
+        model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-2':
+        model = genai.GenerativeModel('gemini-pro')
+    elif model_name == 'gemini-pro-1.5':
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+    elif model_name == 'palm2':
+        model = 'models/text-bison-001'
+    return model, tokenizer
+
+def get_openai_model(model_name):
+    tokenizer = None
+    if model_name == 'gpt3.5':
+        model = "gpt-3.5-turbo-0613"
+    elif model_name == 'gpt4':
+        model = "gpt-4-turbo-preview"
+    return model, tokenizer
+
+# def get_model_and_tokenize_for_calcul_q(model_name):
+#     # TODO
+#     model = None
+#     tokenizer = None
+#     # Qwen 14B + LLama 13B + Mixtral
+#     # Qwen 72B + LLama 70B + Mixtral
+#     return (model, tokenizer)
+
+def load_json(prompt_path, endpoint_path):
+    with open(prompt_path, "r") as prompt_file:
+        prompt_dict = json.load(prompt_file)
+
+    with open(endpoint_path, "r") as endpoint_file:
+        endpoint_dict = json.load(endpoint_file)
+
+    return prompt_dict, endpoint_dict
+
+# def construct_message(agent_context, instruction, idx):
+#     prefix_string = "Here are a list of opinions from different agents: "
+
+#     prefix_string = prefix_string + agent_context + "\n\n Write a summary of the different opinions from each of the individual agent."
+
+#     message = [{"role": "user", "content": prefix_string}]
+
+#     try:
+#         completion = client.chat.completions.create(model="gpt-3.5-turbo-0613",
+#         messages=message,
+#         max_tokens=256,
+#         n=1)['choices'][0]['message']['content']
+#     except:
+#         print("retrying ChatGPT due to an error......")
+#         time.sleep(5)
+#         return construct_message(agent_context, instruction, idx)
+
+#     prefix_string = f"Here is a summary of responses from other agents: {completion}"
+#     prefix_string = prefix_string + "\n\n Use this summarization carefully as additional advice, can you provide an updated answer? Make sure to state your answer at the end of the response." + instruction
+#     return prefix_string
+
+# def summarize_message(agent_contexts, instruction, idx):
+#     prefix_string = "Here are a list of opinions from different agents: "
+
+#     for agent in agent_contexts:
+#         agent_response = agent[-1]["content"]
+#         response = "\n\n One agent response: ```{}```".format(agent_response)
+
+#         prefix_string = prefix_string + response
+
+#     prefix_string = prefix_string + "\n\n Write a summary of the different opinions from each of the individual agent."
+#     completion = construct_message(prefix_string, instruction, idx)
+
+#     return completion
 
 def parse_question_answer(df):
-    question = f"Can you answer the following question as accurately as possible? {df['question']}: A) {df['A']}, B) {df['B']}, C) {df['C']}, D) {df['D']} Explain your answer, putting the answer in the form (X) at the end of your response."
+    question = f"Can you answer the following math question as accurately as possible? {df['question']}: A) {df['A']}, B) {df['B']}, C) {df['C']}, D) {df['D']} Explain your reasoning, putting the answer in the form (X) at the end of your response."
     answer = df["answer"]
     return question, answer
 
-def generate_mmlu(agents, question):
-    agent_contexts = [[{"model": agent, "content": question}] for agent in agents]
+def generate_mmlu(agents, question, is_cot=False):
+    if is_cot:
+        agent_contexts = [[{"model": agent, "content": question + "\nLet's think step by step."}] for agent in agents]
+    else:
+        agent_contexts = [[{"model": agent, "content": question}] for agent in agents]
     return agent_contexts
+
+# def generate_mmlu(agents, question, is_cot):
+#     if is_cot:
+#         agent_contexts = [[{"model": agent, "content": f"Can you solve the following math question as accurately as possible? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response. Let's think step by step."}] for agent in agents]
+#     else:
+#         agent_contexts = [[{"model": agent, "content": f"Can you solve the following math question as accurately as possible? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response."}] for agent in agents]
+#     return agent_contexts
 
 if __name__ == "__main__":
     args = args_parse()
     model_list = [args.model_1, args.model_2, args.model_3]
+    model_dict = {}
+    for i,mdl in enumerate(model_list):
+        model_dict[model_list[i]] = get_model_and_tokenizer(model_list[i])
 
     prompt_dict, endpoint_dict = load_json("src/prompt_template.json", "src/inference_endpoint.json")
 
-    def generate_answer(model, formatted_prompt):
-        API_URL = endpoint_dict[model]["API_URL"]
-        headers = endpoint_dict[model]["headers"]
-        payload = {
-            "inputs": formatted_prompt,
-            "parameters": {
-                "max_new_tokens": 256
-            }
-        }
+    def generate_answer(model_name, formatted_prompt, retries = 0):
+        model, tokenizer = model_dict[model_name]
+        max_retries = 10
+
         try:
-            resp = requests.post(API_URL, json=payload, headers=headers)
-            response = resp.json()
-        except:
-            print("retrying due to an error......")
+            resp = generate_response(formatted_prompt,model_name, model, tokenizer)
+            # resp = requests.post(API_URL, json=payload, headers=headers)
+            response = resp
+        except Exception as e:
+            print(f"retrying due to an error: {e}")
+            retries+=1
+            if retries > max_retries:
+                return {"model": model_name, "content": ""}
             time.sleep(5)
-            return generate_answer(API_URL, headers, payload)
+            return generate_answer(model_name, formatted_prompt, retries)
         
-        return {"model": model, "content": response[0]["generated_text"]}
+        return {"model": model_name, "content": response}
     
     def prompt_formatting(model, instruction, cot):
         if model == "alpaca" or model == "orca":
@@ -149,7 +445,9 @@ if __name__ == "__main__":
         for debate in range(rounds+1):
             # Refer to the summarized previous response
             if debate != 0:
-                message.append(summarize_message(agent_contexts, question, 2 * debate - 1))
+                # message.append(f"Can you solve the following math problem? {question} Explain your reasoning. Your final answer should be a single numerical number, in the form \\boxed{{answer}}, at the end of your response.")
+                curr_message = summarize_message(agent_contexts, "gemini", question, args.cot, 2 * debate - 1)
+                message.append(curr_message)
                 for i in range(len(agent_contexts)):
                     agent_contexts[i].append(prompt_formatting(agent_contexts[i][-1]["model"], message, args.cot))
 
@@ -160,14 +458,34 @@ if __name__ == "__main__":
 
         print(f"# Question No.{idx+1} debate is ended.")
 
+        # models_response = {
+        #     f"{args.model_1}": [agent_contexts[0][1]["content"], agent_contexts[0][2]["content"], agent_contexts[0][3]["content"]],
+        #     f"{args.model_2}": [agent_contexts[1][1]["content"], agent_contexts[1][2]["content"], agent_contexts[1][3]["content"]],
+        #     f"{args.model_3}": [agent_contexts[2][1]["content"], agent_contexts[2][2]["content"], agent_contexts[2][3]["content"]]
+        # }
+        # response_summarization = [
+        #     message[0], message[1]
+        # ]
+        model_1_responses = []
+        model_2_responses = []
+        model_3_responses = []
+        for k in range(1, len(agent_contexts[0]),2):
+            model_1_responses.append(agent_contexts[0][k]["content"])
+            model_2_responses.append(agent_contexts[1][k]["content"])
+            model_3_responses.append(agent_contexts[2][k]["content"])
+
         models_response = {
-            f"{args.model_1}": [agent_contexts[0][1]["content"], agent_contexts[0][2]["content"], agent_contexts[0][3]["content"]],
-            f"{args.model_2}": [agent_contexts[1][1]["content"], agent_contexts[1][2]["content"], agent_contexts[1][3]["content"]],
-            f"{args.model_3}": [agent_contexts[2][1]["content"], agent_contexts[2][2]["content"], agent_contexts[2][3]["content"]]
+            f"{args.model_1}-1": model_1_responses,
+            f"{args.model_2}-2": model_2_responses,
+            f"{args.model_3}-3": model_3_responses
         }
-        response_summarization = [
-            message[0], message[1]
-        ]
+
+        if rounds < 2:
+            response_summarization = [message[0]]
+        else:
+            response_summarization = [
+                message[0], message[1]
+            ]
         generated_description.append({"question_id": idx, "question": question, "agent_response": models_response, "summarization": response_summarization, "answer": answer})
 
     if args.cot:
