@@ -40,7 +40,6 @@ The following description is the process of our experiment. Please follow the pr
 We would like to note that we don't provide the inference endpoint APIs. 
 Therefore, we recommend creating your inference endpoint API if you want to conduct the experiments.
 
-0. [**Setup inference endpoint**](#setup-inference-endpoint)
 1. [**Requirements**](#requirements)
 2. [**Inference**](#inference)
 3. [**Evaluation**](#evaluation)
