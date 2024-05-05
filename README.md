@@ -49,7 +49,7 @@ Therefore, we recommend creating your inference endpoint API if you want to cond
 To install the required library, just run these two lines of code!
 
 ```
-%cd LLM-Agora
+%cd multiagent-debate
 pip install -r src/requirements.txt 
 ```
 
