@@ -113,10 +113,13 @@ python GSM8K/gsm_inference.py \
 ## Citation
 
 ```
-@article{du2023improving,
-  title={Improving Factuality and Reasoning in Language Models through Multiagent Debate},
-  author={Du, Yilun and Li, Shuang and Torralba, Antonio and Tenenbaum, Joshua B and Mordatch, Igor},
-  journal={arXiv preprint arXiv:2305.14325},
-  year={2023}
+@misc{hegazy2024diversitythoughtelicitsstronger,
+      title={Diversity of Thought Elicits Stronger Reasoning Capabilities in Multi-Agent Debate Frameworks}, 
+      author={Mahmood Hegazy},
+      year={2024},
+      eprint={2410.12853},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2410.12853}, 
 }
 ```
